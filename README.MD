@@ -38,64 +38,78 @@
 ## 3. 數據庫設計
 
 ### 3.1 表結構
+
 ```sql
--- Player表
+-- 創建玩家表
 CREATE TABLE Player (
-    PlayerID INT PRIMARY KEY,
-    Name VARCHAR(100),
-    Email VARCHAR(100),
-    Password VARCHAR(255),
-    RegistrationDate DATETIME,
-    LastLoginDate DATETIME
-);
+    PlayerID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Password VARCHAR(255) NOT NULL,
+    RegisterDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    LastLoginDate DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Game表
+-- 創建遊戲表
 CREATE TABLE Game (
-    GameID INT PRIMARY KEY,
-    GameName VARCHAR(100),
-    Genre VARCHAR(50),
-    ReleaseDate DATE,
-    Description TEXT
-);
+    GameID INT AUTO_INCREMENT PRIMARY KEY,
+    GameName VARCHAR(100) NOT NULL,
+    Genre VARCHAR(50) NOT NULL,
+    ReleaseDate DATE NOT NULL,
+    Description TEXT,
+    CoverImage VARCHAR(255),
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Spokesperson表
-CREATE TABLE Spokesperson (
-    SpokespersonID INT PRIMARY KEY,
+-- 創建製造商表
+CREATE TABLE Manufacturer (
+    ManufacturerID INT AUTO_INCREMENT PRIMARY KEY,
     GameID INT UNIQUE,
-    Name VARCHAR(100),
+    Name VARCHAR(100) NOT NULL,
+    Country VARCHAR(50),
+    FoundedYear INT,
     Description TEXT,
-    FOREIGN KEY (GameID) REFERENCES Game(GameID)
-);
+    LogoURL VARCHAR(255),
+    Website VARCHAR(255),
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (GameID) REFERENCES Game(GameID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Achievement表
+-- 創建成就表
 CREATE TABLE Achievement (
-    AchievementID INT PRIMARY KEY,
+    AchievementID INT AUTO_INCREMENT PRIMARY KEY,
     GameID INT,
-    AchievementName VARCHAR(100),
+    AchievementName VARCHAR(100) NOT NULL,
     Description TEXT,
-    FOREIGN KEY (GameID) REFERENCES Game(GameID)
-);
+    Points INT DEFAULT 0,
+    IconURL VARCHAR(255),
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (GameID) REFERENCES Game(GameID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- GameProgress表
+-- 創建遊戲進度表
 CREATE TABLE GameProgress (
-    ProgressID INT PRIMARY KEY,
     PlayerID INT,
     GameID INT,
-    ProgressPercentage FLOAT,
-    LastUpdated DATETIME,
-    FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID),
-    FOREIGN KEY (GameID) REFERENCES Game(GameID)
-);
+    ProgressPercentage DECIMAL(5,2) DEFAULT 0.00,
+    LastPlayedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (PlayerID, GameID),
+    FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID) ON DELETE CASCADE,
+    FOREIGN KEY (GameID) REFERENCES Game(GameID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Player_Achievement表
-CREATE TABLE Player_Achievement (
+-- 創建收藏表
+CREATE TABLE Favorites (
     PlayerID INT,
-    AchievementID INT,
-    UnlockTime DATETIME,
-    PRIMARY KEY (PlayerID, AchievementID),
-    FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID),
-    FOREIGN KEY (AchievementID) REFERENCES Achievement(AchievementID)
-);
+    GameID INT,
+    AddedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (PlayerID, GameID),
+    FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID) ON DELETE CASCADE,
+    FOREIGN KEY (GameID) REFERENCES Game(GameID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 3.2 關係說明
